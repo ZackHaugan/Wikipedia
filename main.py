@@ -109,7 +109,7 @@ class Tree:
         # remove the page being searched from the list of endpoints
         self.endpoints.remove(searchPage)
 
-        children = self.__getChildren(searchPage)
+        children = self.getChildren(searchPage)
 
         if self.queueLevel == len(self.levels) - 1:
             # the queue we're pulling from is the lowest level of the tree and there is a new level to add 
@@ -140,7 +140,7 @@ class Tree:
         
         return (True, unseenChildren, lastInQueue)
 
-    def __getChildren(self, searchPage:Page) -> set:
+    def getChildren(self, searchPage:Page) -> set:
         """Searches the page provided and returns a set of the children of that page
         
         searchPage (Page object): the page that should be searched
@@ -267,12 +267,13 @@ class Game:
                 print("No paths possible (ending tree has no more pages that link to any of the endpoints)")
             return self.paths[self.searchIndex - newCount:self.searchIndex]
 
+        originalStartIndex = self.searchIndex
 
         for i in range(self.searchIndex, min(targetIndex, len(self.paths))):
             self.searchIndex += 1
             newCount += 1
             if(printInfo):
-                print(f"({newCount}) {self.__getPathStringFromPath(self.paths[i])}") 
+                print(f"({newCount}) {self.getPathStringFromPath(self.paths[i])}") 
         
         while self.searchIndex < targetIndex:
             queueEmpty = False
@@ -291,7 +292,7 @@ class Game:
                         # there are no more pages to search, either error or no branches left
                         if(printInfo):
                             print("\nNo paths possible (starting tree has no more searchable links)")
-                        return self.paths[self.searchIndex - newCount:self.searchIndex]
+                        return self.paths[originalStartIndex:originalStartIndex + count]
                     
                     if len(endpoints.intersection(res[1])) > 0:
                         # at least one path exists
@@ -322,7 +323,7 @@ class Game:
                         # there are no more pages to search, either error or no branches left
                         if(printInfo):
                             print("\nNo paths possible (ending tree has no more pages that link to any of the endpoints)")
-                        return self.paths[self.searchIndex - newCount:self.searchIndex]
+                        return self.paths[originalStartIndex:originalStartIndex + count]
                     
                     if len(endpoints.intersection(res[1])) > 0:
                         # at least one path exists
@@ -343,7 +344,7 @@ class Game:
                     queueEmpty = res[2]
         if(printInfo):
             print(f"\r({time.perf_counter() - startTime:.2f}) {self.getStatusString()}")
-        return self.paths[self.searchIndex - newCount:self.searchIndex] 
+        return self.paths[originalStartIndex:originalStartIndex + count] 
         
 
     def getStatusString(self) -> str:
@@ -410,7 +411,7 @@ class Game:
         return out
     
 
-    def __getPathStringFromPath(self, path:list) -> str:
+    def getPathStringFromPath(self, path:list) -> str:
         """Generates the path string of a Path given a page that is found in both trees
         
         path (list [Page object, ...]): the path to generate the string representation of
